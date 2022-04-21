@@ -89,15 +89,20 @@ for M in range(1, 2):
     df_r1.to_csv(pathr)
 
     # plot characteristics
-    plt.figure(figsize=[25, 5], dpi=100)
+    plt.figure(figsize=[30, 5], dpi=100)
     for i in range(1,5):
         plt.subplot(5,1,i)
         plt.plot(cat[:,i])
+        plt.grid()
         plt.title('Characteristic {}'.format(i))
 
     # plot returns
     plt.subplot(5,1,5)
+
+    #plt.subplots_adjust(bottom=0.4, top=0.5)
+    plt.tight_layout()
     plt.plot(r1[:,0],'r')
+    plt.grid()
     plt.title('Return')
     plt.savefig('data.png')
 
