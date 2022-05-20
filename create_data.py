@@ -18,14 +18,15 @@ for M in range(1, 2):
 
     # %% Case Pc=100 %%%
     # cem: it seems N needs to be larger than T, otherwise the code breaks
-    N=25    # 200
-    m=20
-    T=20    # 180
+    N=250    # 200
+    m=30
+    T=200    # 180
     stdv=0.05
     theta_w=0.02
     stde=0.05
     
-    rho=(torch.rand((m, 1))/10) + 0.9  
+    #rho=(torch.rand((m, 1))/10) + 0.9  
+    rho=(torch.rand((m, 1))) #+ 0.1  
     c=torch.zeros(N*T, m);
     for i in range(m):
         x=torch.zeros(N,T);
@@ -73,26 +74,29 @@ for M in range(1, 2):
     combined = []
     for lst in theta:
         combined = combined + lst
-    theta = torch.tensor(combined).float()
+    theta = torch.tensor(combined).float()  # *theta_w
     cat = torch.cat([c, cy], dim=1)     
-    
+
     rt = torch.matmul(cat, theta.unsqueeze(1))
     r1 = rt + betav.unsqueeze(1) + ep
 
-    pathc = os.path.join(path, name2, 'c{}.csv'.format(M)) 
+    pathc = os.path.join(path, name2, 'c{}.t'.format(M)) 
+    cat_rsh = cat.reshape(N, T, -1)
+    torch.save(cat_rsh, pathc) 
+    #df_cat = pd.DataFrame(cat)
+    #df_cat.to_csv(pathc)
 
-    df_cat = pd.DataFrame(cat)
-    df_cat.to_csv(pathc)
-
-    pathr = os.path.join(path, name2, 'r1_{}.csv'.format(M))
-    df_r1 = pd.DataFrame(r1)
-    df_r1.to_csv(pathr)
+    pathr = os.path.join(path, name2, 'r1_{}.t'.format(M))
+    r1_rsh = r1.reshape(N, T)
+    torch.save(r1_rsh, pathr) 
+    #df_r1 = pd.DataFrame(r1)
+    #df_r1.to_csv(pathr)
 
     # plot characteristics
     plt.figure(figsize=[30, 5], dpi=100)
     for i in range(1,5):
         plt.subplot(5,1,i)
-        plt.plot(cat[:,i])
+        plt.plot(cat_rsh[0, :, i])
         plt.grid()
         plt.title('Characteristic {}'.format(i))
 
@@ -101,25 +105,27 @@ for M in range(1, 2):
 
     #plt.subplots_adjust(bottom=0.4, top=0.5)
     plt.tight_layout()
-    plt.plot(r1[:,0],'r')
+    plt.plot(r1_rsh[0, :],'r')
     plt.grid()
     plt.title('Return')
     plt.savefig('data.png')
 
     #  %%% Model 2
     # theta=[1,1,repelem(0,m-2),0,0,1,repelem(0,m-3)]*theta_w;
-    z = torch.cat([c, cy], dim=1)    #  horzcat(c,cy);
-    z[:,0]=2 * c[:,0]**2;
-    z[:,1]=1.5 * c[:,0]*c[:,1]*1.5;
-    z[:,m+2]=torch.sign(cy[:,2])*0.6;
-    
-    r1 = torch.matmul(z, theta.unsqueeze(1)) + betav + ep  #z*theta'+betav+ep;
-    rt = torch.matmul(z, theta.unsqueeze(1)) 
-    # %disp(1-sum((r1-rt).^2)/sum((r1-mean(r1)).^2));
+    #z = torch.cat([c, cy], dim=1)    #  horzcat(c,cy);
+    #z[:,0]=2 * c[:,0]**2;
+    #z[:,1]=1.5 * c[:,0]*c[:,1]*1.5;
+    #z[:,m+2]=torch.sign(cy[:,2])*0.6;
+    #
+    #r2 = torch.matmul(z, theta.unsqueeze(1)) + betav + ep  #z*theta'+betav+ep;
+    #rt = torch.matmul(z, theta.unsqueeze(1)) 
+    ## %disp(1-sum((r1-rt).^2)/sum((r1-mean(r1)).^2));
 
-    pathr = os.path.join(path, name2, 'r2_{}.csv'.format(M))
-    df_r1 = pd.DataFrame(r1)
-    df_r1.to_csv(pathr)
+    #pathr2 = os.path.join(path, name2, 'r2_{}.t'.format(M)) 
+    ##r2_rsh = r2.reshape(N, T)
+    #torch.save(r2_rsh, pathr2)
+    #df_r2 = pd.DataFrame(r2)
+    #df_r2.to_csv(pathr2)
     
 
     # # %%% Case Pc=50 %%%
